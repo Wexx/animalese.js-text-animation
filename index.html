@@ -6,57 +6,89 @@
 <script src="Blob.js"></script>
 <script src="FileSaver.min.js"></script>
 <script src="animalese.js"></script>
+<link rel="stylesheet" href="style.css">
 <script>
-function dataURItoBlob(dataURI) {
-  // convert base64/URLEncoded data component to raw binary data held in a string
-  var byteString;
-  if (dataURI.split(',')[0].indexOf('base64') >= 0)
-    byteString = atob(dataURI.split(',')[1]);
-  else
-    byteString = unescape(dataURI.split(',')[1]);
+  function dataURItoBlob(dataURI) {
+    // convert base64/URLEncoded data component to raw binary data held in a string
+    var byteString;
+    if (dataURI.split(',')[0].indexOf('base64') >= 0)
+      byteString = atob(dataURI.split(',')[1]);
+    else
+      byteString = unescape(dataURI.split(',')[1]);
 
-  // separate out the mime component
-  var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0]
+    // separate out the mime component
+    var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0]
 
-  // write the bytes of the string to a typed array
-  var ia = new Uint8Array(byteString.length);
-  for (var i = 0; i < byteString.length; i++) {
-    ia[i] = byteString.charCodeAt(i);
+    // write the bytes of the string to a typed array
+    var ia = new Uint8Array(byteString.length);
+    for (var i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+
+    return new Blob([ia], {type:mimeString});
   }
 
-  return new Blob([ia], {type:mimeString});
-}
+  var synth = new Animalese('animalese.wav', function() {
+    document.getElementById("preview").disabled = false;
+    document.getElementById("download").disabled = false;
+  });
 
-var synth = new Animalese('animalese.wav', function() {
-  document.getElementById("preview").disabled = false;
-  document.getElementById("download").disabled = false;
-});
+  function generateWav() {
+      return synth.Animalese(document.getElementById("text-input").value,
+                             document.getElementById("shorten").checked,
+                             document.getElementById("pitch").value).dataURI;
+  }
 
-function generateWav() {
-    return synth.Animalese(document.getElementById("text").value,
-                           document.getElementById("shorten").checked,
-                           document.getElementById("pitch").value).dataURI;
-}
+  function preview() {
+    var audio = new Audio();
+    audio.src = generateWav();
+    audio.play();
+    // animation for text
+    var textInput = document.getElementById('text-input').value;
+    var textDisplay = document.getElementById('text-display');
+    var newDom = '';
+    var animationDelay = 33;
+    
+    var length = textInput.length;  
 
-function preview() {
-  var audio = new Audio();
-  audio.src = generateWav();
-  audio.play();
-}
+      for(let i = 0; i < length; i++)
+      {
+          newDom += '<span class="char">' + (textInput[i] == ' ' ? '&nbsp;' : textInput[i])+ '</span>';
+      }
 
-function download() {
-  var wave = generateWav();
-  saveAs(dataURItoBlob(wave), "animalese.wav");
-}
+      textDisplay.innerHTML = newDom;
+
+      for(let i = 0; i < length; i++)
+      {
+          textDisplay.children[i].style['animation-delay'] = animationDelay * i + 'ms';
+      }
+    
+      textInput.innerText = '';
+    }
+
+    function download() {
+      var wave = generateWav();
+      saveAs(dataURItoBlob(wave), "animalese.wav");
+    }
+  
+  
+    
 
 </script>
 <body>
+  <div class="main-form">
     <h2>animalese.js Demo</h2>
     <p>More information and the source at <a href="https://github.com/Acedio/animalese.js">https://github.com/Acedio/animalese.js</a>.</p>
-    <textarea id="text" rows"4" cols="50">Testing out animalese.js. Did it work?</textarea><br/>
+    <textarea id="text-input" rows"4" cols="50">Testing out animalese.js. Did it work?</textarea><br/>
     <label>Shorten words<input id="shorten" type="checkbox"/></label><br/>
     <label>Grump<input id="pitch" type="range" min="0.2" max="2.0" value="1.0" step="0.1"/>Isabelle</label><br/>
     <button id="preview" type="button" disabled="true" onclick="preview()">Preview!</button>
     <button id="download" type="button" disabled="false" onclick="download()">Download!</button>
+  </div>
+  <div>
+        <div class="center">
+        <p id="text-display"></p>
+    </div>
+  </div>
 </body>
 </html>
