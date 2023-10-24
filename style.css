@@ -35,11 +35,11 @@ p{
 @keyframes an{
     from{
         opacity: 0;
-        transform: perspective(240px) translate3d(90px, 0px, 150px) rotate3d(1, -1, 1, 90deg);
+        transform: perspective(1000px) translate3d(5px, 0px, 0px) rotate3d(1, -1, 1, 0deg);
     }
     to{
         opacity: 1;
-        transform: perspective(40px) translate3d(1, 0, 0);
+        transform: perspective(2000px) translate3d(1, 0, 0);
     }
 }
 .mylink{
